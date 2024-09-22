@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Animation modifiée */
+    @keyframes slide {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(300px);
+      }
+      
+    }
+
+    /* Appliquer l'animation */
+    .box {
+      width: 100px;
+      height: 100px;
+      background-color: coral;
+      animation: slide 2s linear infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="box"></div>
+</body>
+</html>
