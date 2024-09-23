@@ -12,6 +12,7 @@
 #include <Wire.h>
 #include <SPI.h>
 #include <MFRC522.h>
+#include <BMP280.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 #include "time.h"
@@ -67,6 +68,7 @@ const char* ntpServer = "pool.ntp.org";
 
 MFRC522 mfrc522(SS_PIN, RST_PIN); 
 BH1750 lightMeter;
+BMP280 bmp280;
 
 // Timer variables (send new readings every thirty seconds)
 unsigned long sendDataPrevMillis = 0;
@@ -102,8 +104,9 @@ unsigned long getTime() {
 
 void setup(){
   Serial.begin(115200);
-  SPI.begin(7,5,6,0);   
-  Wire.begin(20,21);
+  SPI.begin(7,21,20,0);   
+  Wire.begin(5,6); //Join I2C bus
+  bmp280.begin();
   initWiFi();
   mfrc522.PCD_Init(); 
   lightMeter.begin();
@@ -212,7 +215,7 @@ void loop(){
       }
       Pname = name;
     }
-  // Send new readings to database
+
   if (Firebase.ready() && (millis() - sendDataPrevMillis > timerDelay || sendDataPrevMillis == 0)){
     sendDataPrevMillis = millis();
     //Get current timestamp
@@ -222,10 +225,10 @@ void loop(){
 
     parentPath= databasePath + "/" + String(timestamp);
     
-    json.set(tempPath.c_str(), "50");
+    json.set(tempPath.c_str(), String(bmp280.getTemperature()));
     json.set(rfidPath.c_str(),name);
     json.set(lumPath.c_str(), String(lightMeter.readLightLevel()));
-    json.set(presPath.c_str(), "10");
+    json.set(presPath.c_str(), String(bmp280.getPressure()));
     json.set(timePath, String(timestamp));
     Serial.printf("Set json... %s\n", Firebase.RTDB.setJSON(&fbdo, parentPath.c_str(), &json) ? "ok" : fbdo.errorReason().c_str());
   }
