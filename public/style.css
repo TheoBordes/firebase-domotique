@@ -38,6 +38,19 @@ body {
 
 }
 
+.led {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: red; /* Couleur par défaut */
+    box-shadow: 0 0 10px red; /* Effet lumineux */
+    display: inline-block;
+}
+.green {
+    background-color: green;
+    box-shadow: 0 0 10px green;
+}
+
 .cards {
     max-width: 800px;
     margin: 0 auto;

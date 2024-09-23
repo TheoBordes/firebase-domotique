@@ -26,7 +26,8 @@ function epochToJsDate(epochTime){
       chart.series[0].addPoint([x, y], true, false, true);
     }
   }
-  
+
+
   // DOM elements
   const loginElement = document.querySelector('#login-form');
   const contentElement = document.querySelector("#content-sign-in");
@@ -53,7 +54,12 @@ function epochToJsDate(epochTime){
   const presElement = document.getElementById("pres");
   const rfidElement = document.getElementById("rfid");
   const updateElement = document.getElementById("lastUpdate")
+ 
   
+  
+
+
+
   // MANAGE LOGIN/LOGOUT UI
   const setupUI = (user) => {
     if (user) {
@@ -78,7 +84,7 @@ function epochToJsDate(epochTime){
   
       // CHARTS
       // Number of readings to plot on charts
-      var chartRange = 0;
+      var chartRange = 1;
       // Get number of readings to plot saved on database (runs when the page first loads and whenever there's a change in the database)
       chartRef.on('value', snapshot =>{
         chartRange = Number(snapshot.val());
@@ -93,6 +99,7 @@ function epochToJsDate(epochTime){
         chartP = createPressureChart();
         // Update the charts with the new range
         // Get the latest readings and plot them on charts (the number of plotted readings corresponds to the chartRange value)
+        console.log("Valeur de chartRange :", chartRange);
         dbRef.orderByKey().limitToLast(chartRange).on('child_added', snapshot =>{
           var jsonData = snapshot.toJSON(); // example: {temperature: 25.02, luminosity: 50.20, pressure: 1008.48, timestamp:1641317355}
           // Save values on variables
@@ -151,6 +158,9 @@ function epochToJsDate(epochTime){
         var pressure = jsonData.pressure;
         var rfid = jsonData.rfid;
         var timestamp = jsonData.timestamp;
+        if (rfid.trim() == "Theo Bordes"){ 
+          led.className = 'led green';}
+        else {led.className = 'led'}
         // Update DOM elements
         tempElement.innerHTML = temperature;
         lumElement.innerHTML = luminosity;
@@ -297,3 +307,5 @@ function epochToJsDate(epochTime){
       contentElement.style.display = 'none';
     }
   }
+
+

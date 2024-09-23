@@ -44,7 +44,7 @@ FirebaseConfig config;
 
 // Variable to save USER UID
 String uid;
-String state = "",Fname, Lname,name ="";
+String state = "",Fname, Lname,name ="",Pname="";
 
 String Read_RFID();
 // Database main path (to be updated in setup with the user UID)
@@ -71,7 +71,6 @@ BH1750 lightMeter;
 // Timer variables (send new readings every thirty seconds)
 unsigned long sendDataPrevMillis = 0;
 unsigned long timerDelay = 2000;
-unsigned long ptime = 0;
 
 
 // Initialize WiFi
@@ -206,14 +205,16 @@ String Read_RFID(){
 
 
 void loop(){
-   
+  if ( mfrc522.PICC_IsNewCardPresent() &&  mfrc522.PICC_ReadCardSerial()) {
+        name = Read_RFID();
+      if ( name == Pname){
+          name ="";
+      }
+      Pname = name;
+    }
   // Send new readings to database
   if (Firebase.ready() && (millis() - sendDataPrevMillis > timerDelay || sendDataPrevMillis == 0)){
     sendDataPrevMillis = millis();
-   if ( mfrc522.PICC_IsNewCardPresent() &&  mfrc522.PICC_ReadCardSerial()) {
-    name = Read_RFID();
-    Serial.println("dalt");
-    }
     //Get current timestamp
     timestamp = getTime();
     //Serial.print ("time: ");
@@ -228,4 +229,5 @@ void loop(){
     json.set(timePath, String(timestamp));
     Serial.printf("Set json... %s\n", Firebase.RTDB.setJSON(&fbdo, parentPath.c_str(), &json) ? "ok" : fbdo.errorReason().c_str());
   }
+  
 }
