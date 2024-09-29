@@ -36,8 +36,8 @@
 // Insert RTDB URLefine the RTDB URL
 #define DATABASE_URL "https://domotique-426ee-default-rtdb.europe-west1.firebasedatabase.app"
 
-#define RST_PIN         1          
-#define SS_PIN          0   
+#define RST_PIN         -1          
+#define SS_PIN          13  
 // Define Firebase objects
 FirebaseData fbdo;
 FirebaseAuth auth;
@@ -104,7 +104,7 @@ unsigned long getTime() {
 
 void setup(){
   Serial.begin(115200);
-  SPI.begin(7,21,20,0);   
+  SPI.begin(12,10,11,13);   
   Wire.begin(5,6); //Join I2C bus
   bmp280.begin();
   initWiFi();
