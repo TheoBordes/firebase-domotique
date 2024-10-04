@@ -24,7 +24,7 @@
 
 // Insert your network credentials
 #define WIFI_SSID "abc"
-#define WIFI_PASSWORD "12345678"
+#define WIFI_PASSWORD "12345678"c:\Users\pixel\Desktop\CrowPanel_ESP32_Tutorial\Code\V2.X\Lesson 6 Design UI with Squareline Studio\2.4-2.8-3.5inch\CrowPanel_ESP32_LVGL_Demo\CrowPanel_ESP32_LVGL_Demo.ino
 
 // Insert Firebase project API Key
 #define API_KEY "AIzaSyALggtPTOCEyw0RQW2k3icytNeCiU2NzK8"
