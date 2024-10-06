@@ -5,10 +5,11 @@
 
 #include "ui.h"
 extern void setLedBrightness(int r,int v, int b);
-extern int get_Value();
+extern void get_Value();
 extern int redValue;
 extern int greenValue;
 extern int blueValue;
+extern int tab_sensor[3];
 char str[5];
 char str1[5];
 char str2[5];
@@ -39,7 +40,8 @@ void Lumiere_bleu(lv_event_t * e)
 
 void update_value(lv_event_t * e)
 {
-	lv_label_set_text(ui_Label14, itoa(get_Value(), str,10));
-  lv_label_set_text(ui_Label13, itoa(get_Value(), str1,10));
-  lv_label_set_text(ui_Label12, itoa(get_Value(), str2,10));
-}
+  get_Value(tab_sensor);
+	lv_label_set_text(ui_Label14, itoa(tab_sensor[0], str2,10));
+  lv_label_set_text(ui_Label13, itoa(tab_sensor[1], str2,10));
+  lv_label_set_text(ui_Label12, itoa(tab_sensor[2], str2,10));
+}//
