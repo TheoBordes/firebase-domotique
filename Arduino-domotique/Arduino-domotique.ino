@@ -66,7 +66,7 @@ int timestamp;
 int redValue = 0;
 int greenValue = 0;
 int blueValue = 0;
-int lumiere = 0, pression = 0, temperature =0;
+int lumiere = 0, pression = 0, temperature = 0;
 extern "C" void setLedBrightness(int r, int v, int b);
 extern "C" void get_Value();
 int tab_sensor[3];
@@ -89,7 +89,7 @@ static lv_disp_draw_buf_t draw_buf;
 static lv_color_t buf1[screenWidth * screenHeight / 13];
 // Timer variables (send new readings every thirty seconds)
 unsigned long sendDataPrevMillis = 0;
-unsigned long timerDelay = 2000;
+unsigned long timerDelay = 30000;
 
 
 // Initialize WiFi
@@ -293,35 +293,42 @@ String Read_RFID() {
 
 
 void loop() {
-  lumiere = lightMeter.readLightLevel();
-  pression = bmp280.getPressure() ;
-  temperature = bmp280.getTemperature() ;
-  if ( mfrc522.PICC_IsNewCardPresent() &&  mfrc522.PICC_ReadCardSerial()) {
-        name = Read_RFID();
-      if ( name == Pname){
-          name ="";
-      }
-      Pname = name;
-    }
 
-  if (Firebase.ready() && (millis() - sendDataPrevMillis > timerDelay || sendDataPrevMillis == 0)){
+  if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
+    name = Read_RFID();
+    Serial.println(name);
+    if (Firebase.ready()) {
+      //Get current timestamp
+      timestamp = getTime();
+      //Serial.print ("time: ");
+      //Serial.println (timestamp);
+     
+      parentPath = databasePath + "/" + String(timestamp);
+      json.set(rfidPath.c_str(), name);
+      Serial.printf("Set json... %s\n", Firebase.RTDB.setJSON(&fbdo, parentPath.c_str(), &json) ? "ok" : fbdo.errorReason().c_str());
+    }
+    
+  }
+
+  if (Firebase.ready() && (millis() - sendDataPrevMillis > timerDelay || sendDataPrevMillis == 0)) {
     sendDataPrevMillis = millis();
     //Get current timestamp
     timestamp = getTime();
     //Serial.print ("time: ");
     //Serial.println (timestamp);
-
-    parentPath= databasePath + "/" + String(timestamp);
+    lumiere = lightMeter.readLightLevel();
+    pression = bmp280.getPressure();
+    temperature = bmp280.getTemperature();
+    parentPath = databasePath + "/" + String(timestamp);
 
     json.set(tempPath.c_str(), String(temperature));
-    json.set(rfidPath.c_str(),name);
+    json.set(rfidPath.c_str(), name);
     json.set(lumPath.c_str(), String(lumiere));
     json.set(presPath.c_str(), String(pression));
     json.set(timePath, String(timestamp));
     Serial.printf("Set json... %s\n", Firebase.RTDB.setJSON(&fbdo, parentPath.c_str(), &json) ? "ok" : fbdo.errorReason().c_str());
   }
   lv_timer_handler();
-  delay(2);
 }
 
 
@@ -367,8 +374,8 @@ void setLedBrightness(int r, int v, int b) {
   neopixelWrite(RGB_BUILTIN, r, v, b);
 }
 void get_Value() {
-  int local_tab[3] = {lumiere, pression, temperature};
-    for (int i = 0; i < 3; i++) {
-        tab_sensor[i] = local_tab[i];
-    }
+  int local_tab[3] = { lumiere, pression, temperature };
+  for (int i = 0; i < 3; i++) {
+    tab_sensor[i] = local_tab[i];
+  }
 }

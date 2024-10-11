@@ -903,7 +903,7 @@
               {
                 "disabled": false,
                 "nid": 363775654,
-                "strtype": "BUTTON/EventHandler",
+                "strtype": "_event/EventHandler",
                 "strval": "CLICKED",
                 "childs": [
                   {
@@ -7215,7 +7215,7 @@
               {
                 "disabled": false,
                 "nid": 102727183,
-                "strtype": "BUTTON/EventHandler",
+                "strtype": "_event/EventHandler",
                 "strval": "CLICKED",
                 "childs": [
                   {
@@ -7528,7 +7528,7 @@
               {
                 "disabled": false,
                 "nid": 558835317,
-                "strtype": "SWITCH/EventHandler",
+                "strtype": "_event/EventHandler",
                 "strval": "CLICKED",
                 "childs": [
                   {
@@ -8770,7 +8770,7 @@
     "theme_color2": 0,
     "uiExportFolderPath": "C:\\Users\\pixel\\Desktop\\testUI",
     "projectExportFolderPath": "C:\\Users\\pixel\\Desktop\\testUI",
-    "backup_cnt": 101,
+    "backup_cnt": 119,
     "autosave_cnt": 0,
     "lvgl_version": "8.3.6",
     "callfuncsexport": "C_FILE",
