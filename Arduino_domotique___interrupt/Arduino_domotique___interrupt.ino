@@ -87,6 +87,12 @@ TFT_eSPI lcd = TFT_eSPI(); /* TFT entity */
 
 //MRC522
 MFRC522 mfrc522(SS_PIN, RST_PIN);
+MFRC522::MIFARE_Key key;
+volatile bool bNewInt = false;
+byte regVal = 0x7F;
+void activateRec(MFRC522 mfrc522);
+void clearInt(MFRC522 mfrc522);
+
 
 
 
@@ -197,6 +203,7 @@ void touch_calibrate() {
 }
 
 
+
 void setLedBrightness(int r, int v, int b) {
   neopixelWrite(RGB_BUILTIN, r, v, b);
 }
@@ -207,16 +214,64 @@ void get_Value() {
   }
 }
 
+String dump_byte_array_to_string(byte *buffer, byte bufferSize) {
+  String result = "";
+  for (byte i = 0; i < bufferSize; i++) {
+    if (buffer[i] < 0x10) {
+      result += "0";  // Ajouter un 0 pour les valeurs inférieures à 0x10
+    }
+    result += String(buffer[i], HEX);  // Ajouter l'octet converti en hexadécimal
+    if (i < bufferSize - 1) {
+      result += " ";  // Ajouter un espace entre les octets pour le formatage
+    }
+  }
+  result.toUpperCase();  // Convertir en majuscules
+  return result;         // Renvoyer la chaîne résultante
+}
+void readCard() {
+  bNewInt = true;
+}
+
+/*
+ * The function sending to the MFRC522 the needed commands to activate the reception
+ */
+void activateRec(MFRC522 mfrc522) {
+  mfrc522.PCD_WriteRegister(mfrc522.FIFODataReg, mfrc522.PICC_CMD_REQA);
+  mfrc522.PCD_WriteRegister(mfrc522.CommandReg, mfrc522.PCD_Transceive);
+  mfrc522.PCD_WriteRegister(mfrc522.BitFramingReg, 0x87);
+}
+
+/*
+ * The function to clear the pending interrupt bits after interrupt serving routine
+ */
+void clearInt(MFRC522 mfrc522) {
+  mfrc522.PCD_WriteRegister(mfrc522.ComIrqReg, 0x7F);
+}
+
 
 void setup() {
   Serial.begin(115200);
   SPI.begin(7, 0, 6, 1);
-  mfrc522.PCD_Init();
   Wire.begin(3, 2);  //Join I2C bus
   bmp280.begin();
   initWiFi();
+  mfrc522.PCD_Init();
+   //interrupt
+  pinMode(IRQ_PIN, INPUT_PULLUP);
+  regVal = 0xA0;  //rx irq
+  mfrc522.PCD_WriteRegister(mfrc522.ComIEnReg, regVal);
+
+  bNewInt = false;  //interrupt flag
+
+  /*Activate the interrupt*/
+  //attachInterrupt(digitalPinToInterrupt(IRQ_PIN), readCard, FALLING);
+   //interrupt
+  delay(2);
   lightMeter.begin();
 
+
+
+ 
   configTime(0, 0, ntpServer);
 
   // Assign the api key (required)
@@ -291,78 +346,27 @@ void setup() {
   Serial.println("Setup done");
 }
 
-String Read_RFID() {
-  Fname = "";
-  Lname = " ";
-  // Prepare key - all keys are set to FFFFFFFFFFFFh at chip delivery from the factory.
-  MFRC522::MIFARE_Key key;
-  for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF;
-
-  //some variables we need
-  byte block;
-  byte len;
-  MFRC522::StatusCode status;
-
-  // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
-
-  byte buffer1[18];
-
-  block = 4;
-  len = 18;
-
-  //------------------------------------------- GET FIRST NAME
-  status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, 4, &key, &(mfrc522.uid));  //line 834 of MFRC522.cpp file
-  if (status != MFRC522::STATUS_OK) {
-    String state = "1 Authentication failed: " + String(mfrc522.GetStatusCodeName(status));
-  }
-
-  status = mfrc522.MIFARE_Read(block, buffer1, &len);
-  if (status != MFRC522::STATUS_OK) {
-    state += "1 Reading failed: " + String(mfrc522.GetStatusCodeName(status));
-  }
-  for (uint8_t i = 0; i < 16; i++) {
-    if (buffer1[i] != 32) {
-      Fname += (char)buffer1[i];  // Concaténer dans Fname
-    }
-  }
-  byte buffer2[18];
-  block = 1;
-
-  status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, 1, &key, &(mfrc522.uid));  //line 834
-  if (status != MFRC522::STATUS_OK) {
-    String state = "2 Authentication failed: " + String(mfrc522.GetStatusCodeName(status));
-  }
-
-  status = mfrc522.MIFARE_Read(block, buffer2, &len);
-  if (status != MFRC522::STATUS_OK) {
-    state += " 2 Reading failed: " + String(mfrc522.GetStatusCodeName(status));
-  }
-  for (uint8_t i = 0; i < 16; i++) {
-    Lname += (char)buffer2[i];  // Concaténer dans Fname
-  }
-  mfrc522.PICC_HaltA();
-  mfrc522.PCD_StopCrypto1();
-  return Fname + Lname;
-}
-
 
 
 void loop() {
-
-  if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
-    String name = Read_RFID();
-    Serial.println(name);
+  
+  if (bNewInt) {
+    mfrc522.PICC_ReadCardSerial();
+    String name = dump_byte_array_to_string(mfrc522.uid.uidByte, mfrc522.uid.size);
     if (Firebase.ready()) {
       //Get current timestamp
       timestamp = getTime();
       //Serial.print ("time: ");
       //Serial.println (timestamp);
-
       parentPath = databasePath + "/" + String(timestamp);
       json.set(rfidPath.c_str(), name);
       Serial.printf("Set json... %s\n", Firebase.RTDB.setJSON(&fbdo, parentPath.c_str(), &json) ? "ok" : fbdo.errorReason().c_str());
     }
+    clearInt(mfrc522);
+    mfrc522.PICC_HaltA();
+    bNewInt = false;
   }
+  activateRec(mfrc522);
   if (Firebase.ready() && (millis() - sendDataPrevMillis > timerDelay || sendDataPrevMillis == 0)) {
     sendDataPrevMillis = millis();
     //Get current timestamp
