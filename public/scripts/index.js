@@ -159,7 +159,7 @@ const setupUI = (user) => {
       var pressure = jsonData.pressure;
       var rfid = jsonData.rfid;
       var timestamp = jsonData.timestamp;
-      if (rfid.trim() == "C3 01 B3 A9") { 
+      if (rfid.trim() == "53 7C C8 A9") { 
         led.className = 'led green';  
       } 
       // Update DOM elements

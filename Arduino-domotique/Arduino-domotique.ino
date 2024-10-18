@@ -25,8 +25,8 @@
 #include "addons/RTDBHelper.h"
 
 // Insert your network credentials
-#define WIFI_SSID "Bbox-E470D957"
-#define WIFI_PASSWORD "gp9344TWZPxw7jpK31"
+#define WIFI_SSID "abc"
+#define WIFI_PASSWORD "12345678"
 // Insert Firebase project API Key
 #define API_KEY "AIzaSyALggtPTOCEyw0RQW2k3icytNeCiU2NzK8"
 
@@ -40,7 +40,7 @@
 #define Calldata false
 #define RST_PIN -1
 #define SS_PIN 1
-#define IRQ_PIN 13
+#define IRQ_PIN 12
 // Define Firebase objects
 FirebaseData fbdo;
 FirebaseAuth auth;

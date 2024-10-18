@@ -25,8 +25,8 @@
 #include "addons/RTDBHelper.h"
 
 // Insert your network credentials
-#define WIFI_SSID "Bbox-E470D957"
-#define WIFI_PASSWORD "gp9344TWZPxw7jpK31"
+#define WIFI_SSID "abc"
+#define WIFI_PASSWORD "12345678"
 // Insert Firebase project API Key
 #define API_KEY "AIzaSyALggtPTOCEyw0RQW2k3icytNeCiU2NzK8"
 
@@ -37,10 +37,10 @@
 // Insert RTDB URLefine the RTDB URL
 #define DATABASE_URL "https://domotique-426ee-default-rtdb.europe-west1.firebasedatabase.app"
 #define CALIBRATION_FILE "/TouchCalData1"
-#define Calldata false
+#define Calldata true
 #define RST_PIN -1
 #define SS_PIN 1
-#define IRQ_PIN 13
+#define IRQ_PIN 12
 // Define Firebase objects
 FirebaseData fbdo;
 FirebaseAuth auth;
@@ -231,7 +231,9 @@ String dump_byte_array_to_string(byte *buffer, byte bufferSize) {
 void readCard() {
   bNewInt = true;
 }
-
+void touchTft(){
+  lv_timer_handler();
+}
 /*
  * The function sending to the MFRC522 the needed commands to activate the reception
  */
@@ -250,12 +252,17 @@ void clearInt(MFRC522 mfrc522) {
 
 
 void setup() {
+  pinMode(10,OUTPUT);
+   pinMode(4,OUTPUT);
+  digitalWrite(10,HIGH);
+  digitalWrite(4,HIGH);
   Serial.begin(115200);
   SPI.begin(7, 0, 6, 1);
   Wire.begin(3, 2);  //Join I2C bus
   bmp280.begin();
   initWiFi();
   mfrc522.PCD_Init();
+  
    //interrupt
   pinMode(IRQ_PIN, INPUT_PULLUP);
   regVal = 0xA0;  //rx irq
@@ -264,7 +271,7 @@ void setup() {
   bNewInt = false;  //interrupt flag
 
   /*Activate the interrupt*/
-  //attachInterrupt(digitalPinToInterrupt(IRQ_PIN), readCard, FALLING);
+  attachInterrupt(digitalPinToInterrupt(IRQ_PIN), readCard, FALLING);
    //interrupt
   delay(2);
   lightMeter.begin();
@@ -351,6 +358,8 @@ void setup() {
 void loop() {
   
   if (bNewInt) {
+    Serial.print("salut");
+    digitalWrite(10,0);
     mfrc522.PICC_ReadCardSerial();
     String name = dump_byte_array_to_string(mfrc522.uid.uidByte, mfrc522.uid.size);
     if (Firebase.ready()) {
