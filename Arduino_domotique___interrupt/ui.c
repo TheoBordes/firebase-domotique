@@ -7,7 +7,7 @@
 #include "ui_helpers.h"
 
 ///////////////////// VARIABLES ////////////////////
-
+lv_timer_t * timer_4 = NULL;
 
 // SCREEN: ui_Screen1
 void ui_Screen1_screen_init(void);
@@ -55,8 +55,7 @@ lv_obj_t * ui_Label14;
 void ui_event_Button10(lv_event_t * e);
 lv_obj_t * ui_Button10;
 lv_obj_t * ui_Label17;
-void ui_event_Switch2(lv_event_t * e);
-lv_obj_t * ui_Switch2;
+lv_obj_t * ui_Label7;
 
 
 // SCREEN: ui_Screen5
@@ -92,6 +91,7 @@ void ui_event_Button8(lv_event_t * e)
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
         _ui_screen_change(&ui_Screen4, LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, &ui_Screen4_screen_init);
+        timer_4 = lv_timer_create(update_value, 1000, NULL);
     }
 }
 void ui_event_Slider1(lv_event_t * e)
@@ -143,14 +143,8 @@ void ui_event_Button10(lv_event_t * e)
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
         _ui_screen_change(&ui_Screen1, LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, &ui_Screen1_screen_init);
-    }
-}
-void ui_event_Switch2(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-    lv_obj_t * target = lv_event_get_target(e);
-    if(event_code == LV_EVENT_CLICKED) {
-        update_value(e);
+        lv_timer_del(timer_4);  
+        timer_4 = NULL;
     }
 }
 void ui_event_Button14(lv_event_t * e)

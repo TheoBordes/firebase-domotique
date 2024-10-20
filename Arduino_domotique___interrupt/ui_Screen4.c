@@ -16,6 +16,7 @@ void ui_Screen4_screen_init(void)
     lv_obj_set_x(ui_Label12, -95);
     lv_obj_set_y(ui_Label12, 48);
     lv_obj_set_align(ui_Label12, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label12, "");
 
     ui_Label13 = lv_label_create(ui_Screen4);
     lv_obj_set_width(ui_Label13, LV_SIZE_CONTENT);   /// 1
@@ -23,6 +24,7 @@ void ui_Screen4_screen_init(void)
     lv_obj_set_x(ui_Label13, -96);
     lv_obj_set_y(ui_Label13, -22);
     lv_obj_set_align(ui_Label13, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label13, "");
 
     ui_Label14 = lv_label_create(ui_Screen4);
     lv_obj_set_width(ui_Label14, LV_SIZE_CONTENT);   /// 1
@@ -30,6 +32,7 @@ void ui_Screen4_screen_init(void)
     lv_obj_set_x(ui_Label14, -93);
     lv_obj_set_y(ui_Label14, -83);
     lv_obj_set_align(ui_Label14, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label14, "");
 
     ui_Button10 = lv_btn_create(ui_Screen4);
     lv_obj_set_width(ui_Button10, 100);
@@ -52,15 +55,14 @@ void ui_Screen4_screen_init(void)
     lv_obj_set_align(ui_Label17, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Label17, "PANEL");
 
-    ui_Switch2 = lv_switch_create(ui_Screen4);
-    lv_obj_set_width(ui_Switch2, 50);
-    lv_obj_set_height(ui_Switch2, 25);
-    lv_obj_set_x(ui_Switch2, 111);
-    lv_obj_set_y(ui_Switch2, -88);
-    lv_obj_set_align(ui_Switch2, LV_ALIGN_CENTER);
-
+    ui_Label7 = lv_label_create(ui_Screen4);
+    lv_obj_set_width(ui_Label7, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label7, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Label7, 70);
+    lv_obj_set_y(ui_Label7, -83);
+    lv_obj_set_align(ui_Label7, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label7, "");
 
     lv_obj_add_event_cb(ui_Button10, ui_event_Button10, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_Switch2, ui_event_Switch2, LV_EVENT_ALL, NULL);
 
 }

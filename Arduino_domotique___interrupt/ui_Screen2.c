@@ -36,8 +36,8 @@ void ui_Screen2_screen_init(void)
     ui_Label1 = lv_label_create(ui_Screen2);
     lv_obj_set_width(ui_Label1, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Label1, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Label1, 6);
-    lv_obj_set_y(ui_Label1, -101);
+    lv_obj_set_x(ui_Label1, -3);
+    lv_obj_set_y(ui_Label1, -100);
     lv_obj_set_align(ui_Label1, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Label1, "LED PANEL");
 

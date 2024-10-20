@@ -4,15 +4,20 @@
 // Project name: SquareLine_Project
 
 #include "ui.h"
+
+
+unsigned long previousMillis = 0;  // Pour stocker le temps précédent
+const long interval = 10000;
+
 extern void setLedBrightness(int r,int v, int b);
 extern void get_Value();
 extern int redValue;
 extern int greenValue;
 extern int blueValue;
 extern int tab_sensor[3];
-char str[5];
-char str1[5];
+extern char rfid[12];
 char str2[5];
+
 
 void Lumiere_rouge(lv_event_t * e)
 {
@@ -40,8 +45,20 @@ void Lumiere_bleu(lv_event_t * e)
 
 void update_value(lv_event_t * e)
 {
+ unsigned long currentMillis = millis();
   get_Value(tab_sensor);
 	lv_label_set_text(ui_Label14, itoa(tab_sensor[0], str2,10));
   lv_label_set_text(ui_Label13, itoa(tab_sensor[1], str2,10));
   lv_label_set_text(ui_Label12, itoa(tab_sensor[2], str2,10));
-}//
+  lv_label_set_text(ui_Label7, rfid);
+  if (currentMillis - previousMillis > interval)  {  
+      lv_label_set_text(ui_Label7, "");
+      for (int i = 0; i < 12; i++) {
+           rfid[i] = '\0';  
+    }
+      previousMillis=currentMillis;
+    }
+}
+
+
+

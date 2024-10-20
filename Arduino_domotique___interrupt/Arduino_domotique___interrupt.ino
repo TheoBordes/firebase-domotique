@@ -37,7 +37,7 @@
 // Insert RTDB URLefine the RTDB URL
 #define DATABASE_URL "https://domotique-426ee-default-rtdb.europe-west1.firebasedatabase.app"
 #define CALIBRATION_FILE "/TouchCalData1"
-#define Calldata true
+#define Calldata false
 #define RST_PIN -1
 #define SS_PIN 1
 #define IRQ_PIN 12
@@ -59,6 +59,7 @@ String databasePath;
 String tempPath = "/temperature";
 String lumPath = "/luminosity";
 String presPath = "/pressure";
+String gazPath = "/gaz";
 String rfidPath = "/rfid";
 String timePath = "/timestamp";
 
@@ -70,12 +71,13 @@ int redValue = 0;
 int greenValue = 0;
 int blueValue = 0;
 int lumiere = 0, pression = 0, temperature = 0;
+char rfid[12];
 extern "C" void setLedBrightness(int r, int v, int b);
 extern "C" void get_Value();
 int tab_sensor[3];
 static const uint16_t screenWidth = 320;
 static const uint16_t screenHeight = 240;
-uint16_t calData[5] = { 557, 3263, 369, 3493, 3 };
+uint16_t calData[5] = { 264,3403,416,3262,1 };
 
 
 FirebaseJson json;
@@ -198,7 +200,9 @@ void touch_calibrate() {
     f.write((const unsigned char *)calData, 14);
     f.close();
   }
-
+  for (int i = 0; i < 5; i++) {
+    Serial.println(calData[i]);
+}
   Serial.println("Calibration complete!");
 }
 
@@ -252,10 +256,10 @@ void clearInt(MFRC522 mfrc522) {
 
 
 void setup() {
-  pinMode(10,OUTPUT);
-   pinMode(4,OUTPUT);
+  pinMode(1,OUTPUT);
   digitalWrite(10,HIGH);
   digitalWrite(4,HIGH);
+  digitalWrite(1,HIGH);
   Serial.begin(115200);
   SPI.begin(7, 0, 6, 1);
   Wire.begin(3, 2);  //Join I2C bus
@@ -273,7 +277,7 @@ void setup() {
   /*Activate the interrupt*/
   attachInterrupt(digitalPinToInterrupt(IRQ_PIN), readCard, FALLING);
    //interrupt
-  delay(2);
+  delay(20);
   lightMeter.begin();
 
 
@@ -358,8 +362,7 @@ void setup() {
 void loop() {
   
   if (bNewInt) {
-    Serial.print("salut");
-    digitalWrite(10,0);
+    digitalWrite(1,HIGH);
     mfrc522.PICC_ReadCardSerial();
     String name = dump_byte_array_to_string(mfrc522.uid.uidByte, mfrc522.uid.size);
     if (Firebase.ready()) {
@@ -373,24 +376,27 @@ void loop() {
     }
     clearInt(mfrc522);
     mfrc522.PICC_HaltA();
+    strncpy(rfid, name.c_str(), sizeof(rfid) - 1);
     bNewInt = false;
   }
   activateRec(mfrc522);
+  lumiere = lightMeter.readLightLevel();
+  pression = bmp280.getPressure();
+  temperature = bmp280.getTemperature();
   if (Firebase.ready() && (millis() - sendDataPrevMillis > timerDelay || sendDataPrevMillis == 0)) {
     sendDataPrevMillis = millis();
     //Get current timestamp
     timestamp = getTime();
     //Serial.print ("time: ");
     //Serial.println (timestamp);
-    lumiere = lightMeter.readLightLevel();
-    pression = bmp280.getPressure();
-    temperature = bmp280.getTemperature();
+   
     parentPath = databasePath + "/" + String(timestamp);
 
     json.set(tempPath.c_str(), String(temperature));
     json.set(rfidPath.c_str(), "");
     json.set(lumPath.c_str(), String(lumiere));
     json.set(presPath.c_str(), String(pression));
+    json.set(gazPath.c_str(),"100");
     json.set(timePath, String(timestamp));
     Serial.printf("Set json... %s\n", Firebase.RTDB.setJSON(&fbdo, parentPath.c_str(), &json) ? "ok" : fbdo.errorReason().c_str());
   }

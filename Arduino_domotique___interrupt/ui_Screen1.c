@@ -13,8 +13,8 @@ void ui_Screen1_screen_init(void)
     ui_Label8 = lv_label_create(ui_Screen1);
     lv_obj_set_width(ui_Label8, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Label8, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Label8, -12);
-    lv_obj_set_y(ui_Label8, -98);
+    lv_obj_set_x(ui_Label8, -1);
+    lv_obj_set_y(ui_Label8, -95);
     lv_obj_set_align(ui_Label8, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Label8, "SENSOR PANEL");
 
@@ -40,10 +40,10 @@ void ui_Screen1_screen_init(void)
     lv_label_set_text(ui_Label2, "LED");
 
     ui_Button8 = lv_btn_create(ui_Screen1);
-    lv_obj_set_width(ui_Button8, 81);
-    lv_obj_set_height(ui_Button8, 19);
-    lv_obj_set_x(ui_Button8, -106);
-    lv_obj_set_y(ui_Button8, -58);
+    lv_obj_set_width(ui_Button8, 242);
+    lv_obj_set_height(ui_Button8, 21);
+    lv_obj_set_x(ui_Button8, -3);
+    lv_obj_set_y(ui_Button8, -62);
     lv_obj_set_align(ui_Button8, LV_ALIGN_CENTER);
     lv_obj_add_flag(ui_Button8, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_Button8, LV_OBJ_FLAG_SCROLLABLE);      /// Flags

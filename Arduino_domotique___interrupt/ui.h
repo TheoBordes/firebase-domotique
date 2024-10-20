@@ -5,12 +5,14 @@
 
 #ifndef _SQUARELINE_PROJECT_UI_H
 #define _SQUARELINE_PROJECT_UI_H
+#include "lvgl.h"
+
+extern lv_timer_t * timer_4;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "lvgl.h"
 
 #include "ui_helpers.h"
 #include "ui_events.h"
@@ -55,8 +57,7 @@ extern lv_obj_t * ui_Label14;
 void ui_event_Button10(lv_event_t * e);
 extern lv_obj_t * ui_Button10;
 extern lv_obj_t * ui_Label17;
-void ui_event_Switch2(lv_event_t * e);
-extern lv_obj_t * ui_Switch2;
+extern lv_obj_t * ui_Label7;
 // SCREEN: ui_Screen5
 void ui_Screen5_screen_init(void);
 extern lv_obj_t * ui_Screen5;
