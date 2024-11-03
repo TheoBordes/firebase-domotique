@@ -31,6 +31,72 @@ void ui_Screen3_screen_init(void)
     lv_obj_set_style_text_color(ui_Label3, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Label3, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    ui_Label11 = lv_label_create(ui_Screen3);
+    lv_obj_set_width(ui_Label11, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label11, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Label11, -3);
+    lv_obj_set_y(ui_Label11, -100);
+    lv_obj_set_align(ui_Label11, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label11, "RELAIS");
+
+    ui_Slider5 = lv_slider_create(ui_Screen3);
+    lv_slider_set_value(ui_Slider5, 0, LV_ANIM_OFF);
+    if(lv_slider_get_mode(ui_Slider5) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_Slider5, 100, LV_ANIM_OFF);
+    lv_obj_set_width(ui_Slider5, 194);
+    lv_obj_set_height(ui_Slider5, 10);
+    lv_obj_set_x(ui_Slider5, -28);
+    lv_obj_set_y(ui_Slider5, -62);
+    lv_obj_set_align(ui_Slider5, LV_ALIGN_CENTER);
+
+
+    ui_Button1 = lv_btn_create(ui_Screen3);
+    lv_obj_set_width(ui_Button1, 222);
+    lv_obj_set_height(ui_Button1, 31);
+    lv_obj_set_x(ui_Button1, -5);
+    lv_obj_set_y(ui_Button1, 21);
+    lv_obj_set_align(ui_Button1, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_Button1, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_Button1, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_Button1, lv_color_hex(0x065400), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_Button1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_color(ui_Button1, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_opa(ui_Button1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_Label9 = lv_label_create(ui_Button1);
+    lv_obj_set_width(ui_Label9, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label9, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_Label9, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label9, "ON/OFF");
+    lv_obj_set_style_text_color(ui_Label9, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_Label9, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_Label16 = lv_label_create(ui_Screen3);
+    lv_obj_set_width(ui_Label16, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label16, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Label16, -39);
+    lv_obj_set_y(ui_Label16, -39);
+    lv_obj_set_align(ui_Label16, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label16, "Vitesse relais : ");
+
+    ui_Label18 = lv_label_create(ui_Screen3);
+    lv_obj_set_width(ui_Label18, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label18, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Label18, 48);
+    lv_obj_set_y(ui_Label18, -39);
+    lv_obj_set_align(ui_Label18, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label18, "");
+
+    ui_Switch1 = lv_switch_create(ui_Screen3);
+    lv_obj_set_width(ui_Switch1, 50);
+    lv_obj_set_height(ui_Switch1, 25);
+    lv_obj_set_x(ui_Switch1, 115);
+    lv_obj_set_y(ui_Switch1, -63);
+    lv_obj_set_align(ui_Switch1, LV_ALIGN_CENTER);
+
+
     lv_obj_add_event_cb(ui_Button4, ui_event_Button4, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_Slider5, ui_event_Slider5, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_Button1, ui_event_Button1, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_Switch1, ui_event_Switch1, LV_EVENT_ALL, NULL);
 
 }

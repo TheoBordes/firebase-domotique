@@ -7,11 +7,13 @@
 #define _SQUARELINE_PROJECT_UI_H
 #include "lvgl.h"
 
-extern lv_timer_t * timer_4;
+extern lv_timer_t * timer_sensor;
+extern lv_timer_t * timer_relais;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 
 
 #include "ui_helpers.h"
@@ -42,12 +44,23 @@ void ui_event_Slider3(lv_event_t * e);
 extern lv_obj_t * ui_Slider3;
 extern lv_obj_t * ui_Label4;
 extern lv_obj_t * ui_Label6;
+extern lv_obj_t * ui_Label15;
 // SCREEN: ui_Screen3
 void ui_Screen3_screen_init(void);
 extern lv_obj_t * ui_Screen3;
 void ui_event_Button4(lv_event_t * e);
 extern lv_obj_t * ui_Button4;
 extern lv_obj_t * ui_Label3;
+extern lv_obj_t * ui_Label11;
+void ui_event_Slider5(lv_event_t * e);
+extern lv_obj_t * ui_Slider5;
+void ui_event_Button1(lv_event_t * e);
+extern lv_obj_t * ui_Button1;
+extern lv_obj_t * ui_Label9;
+extern lv_obj_t * ui_Label16;
+extern lv_obj_t * ui_Label18;
+void ui_event_Switch1(lv_event_t * e);
+extern lv_obj_t * ui_Switch1;
 // SCREEN: ui_Screen4
 void ui_Screen4_screen_init(void);
 extern lv_obj_t * ui_Screen4;
@@ -58,12 +71,6 @@ void ui_event_Button10(lv_event_t * e);
 extern lv_obj_t * ui_Button10;
 extern lv_obj_t * ui_Label17;
 extern lv_obj_t * ui_Label7;
-// SCREEN: ui_Screen5
-void ui_Screen5_screen_init(void);
-extern lv_obj_t * ui_Screen5;
-void ui_event_Button14(lv_event_t * e);
-extern lv_obj_t * ui_Button14;
-extern lv_obj_t * ui_Label20;
 extern lv_obj_t * ui____initial_actions0;
 
 

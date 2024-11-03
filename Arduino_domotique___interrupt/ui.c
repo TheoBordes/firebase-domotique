@@ -7,7 +7,8 @@
 #include "ui_helpers.h"
 
 ///////////////////// VARIABLES ////////////////////
-lv_timer_t * timer_4 = NULL;
+lv_timer_t * timer_sensor = NULL;
+lv_timer_t * timer_relais = NULL;
 
 // SCREEN: ui_Screen1
 void ui_Screen1_screen_init(void);
@@ -36,6 +37,7 @@ void ui_event_Slider3(lv_event_t * e);
 lv_obj_t * ui_Slider3;
 lv_obj_t * ui_Label4;
 lv_obj_t * ui_Label6;
+lv_obj_t * ui_Label15;
 
 
 // SCREEN: ui_Screen3
@@ -44,6 +46,16 @@ lv_obj_t * ui_Screen3;
 void ui_event_Button4(lv_event_t * e);
 lv_obj_t * ui_Button4;
 lv_obj_t * ui_Label3;
+lv_obj_t * ui_Label11;
+void ui_event_Slider5(lv_event_t * e);
+lv_obj_t * ui_Slider5;
+void ui_event_Button1(lv_event_t * e);
+lv_obj_t * ui_Button1;
+lv_obj_t * ui_Label9;
+lv_obj_t * ui_Label16;
+lv_obj_t * ui_Label18;
+void ui_event_Switch1(lv_event_t * e);
+lv_obj_t * ui_Switch1;
 
 
 // SCREEN: ui_Screen4
@@ -56,14 +68,6 @@ void ui_event_Button10(lv_event_t * e);
 lv_obj_t * ui_Button10;
 lv_obj_t * ui_Label17;
 lv_obj_t * ui_Label7;
-
-
-// SCREEN: ui_Screen5
-void ui_Screen5_screen_init(void);
-lv_obj_t * ui_Screen5;
-void ui_event_Button14(lv_event_t * e);
-lv_obj_t * ui_Button14;
-lv_obj_t * ui_Label20;
 lv_obj_t * ui____initial_actions0;
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
@@ -91,7 +95,8 @@ void ui_event_Button8(lv_event_t * e)
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
         _ui_screen_change(&ui_Screen4, LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, &ui_Screen4_screen_init);
-        timer_4 = lv_timer_create(update_value, 1000, NULL);
+        timer_sensor = lv_timer_create(update_value, 1000, NULL);
+  
     }
 }
 void ui_event_Slider1(lv_event_t * e)
@@ -134,7 +139,36 @@ void ui_event_Button4(lv_event_t * e)
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
-        _ui_screen_change(&ui_Screen5, LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, &ui_Screen5_screen_init);
+        _ui_screen_change(&ui_Screen1, LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, &ui_Screen1_screen_init);
+    }
+}
+void ui_event_Slider5(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_VALUE_CHANGED) {
+        Speed_relais(e);
+        _ui_slider_set_text_value(ui_Label18, target, "", "%");
+    }
+}
+void ui_event_Button1(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        Activate_relais_once(e);
+    }
+}
+void ui_event_Switch1(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED & timer_relais==NULL) {
+      timer_relais = lv_timer_create(Activate_relais_once, relais_Speed*10, NULL);   
+    }
+    else if (event_code == LV_EVENT_CLICKED) {
+      lv_timer_del(timer_relais);  
+      timer_relais = NULL;
     }
 }
 void ui_event_Button10(lv_event_t * e)
@@ -143,16 +177,8 @@ void ui_event_Button10(lv_event_t * e)
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
         _ui_screen_change(&ui_Screen1, LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, &ui_Screen1_screen_init);
-        lv_timer_del(timer_4);  
-        timer_4 = NULL;
-    }
-}
-void ui_event_Button14(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-    lv_obj_t * target = lv_event_get_target(e);
-    if(event_code == LV_EVENT_CLICKED) {
-        _ui_screen_change(&ui_Screen1, LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, &ui_Screen1_screen_init);
+        lv_timer_del(timer_sensor);  
+        timer_sensor = NULL;
     }
 }
 
@@ -168,7 +194,6 @@ void ui_init(void)
     ui_Screen2_screen_init();
     ui_Screen3_screen_init();
     ui_Screen4_screen_init();
-    ui_Screen5_screen_init();
     ui____initial_actions0 = lv_obj_create(NULL);
     lv_disp_load_scr(ui_Screen1);
 }

@@ -46,8 +46,8 @@ FirebaseData fbdo;
 FirebaseAuth auth;
 FirebaseConfig config;
 
-
-
+#define MQ_PIN 2
+#define relais_PIN 18
 // Variable to save USER UID
 String uid;
 String state = "", Fname, Lname, Pname = "";
@@ -66,6 +66,12 @@ String timePath = "/timestamp";
 // Parent Node (to be updated in every loop)
 String parentPath;
 
+float Vc = 5.0;
+float RL = 10.0;
+float Ro = 10.0;
+float Rs_Ro_ratio;
+float LPG_PPM;
+
 volatile int timestamp;
 int redValue = 0;
 int greenValue = 0;
@@ -74,11 +80,13 @@ int lumiere = 0, pression = 0, temperature = 0;
 char rfid[12];
 extern "C" void setLedBrightness(int r, int v, int b);
 extern "C" void get_Value();
-int tab_sensor[3];
+extern "C" void relais_once();
+int tab_sensor[4];
 static const uint16_t screenWidth = 320;
 static const uint16_t screenHeight = 240;
-uint16_t calData[5] = { 264,3403,416,3262,1 };
-
+uint16_t calData[5] = { 264, 3403, 416, 3262, 1 };
+int currentTime = 0, previousTime = 0;
+bool state_led = 0;
 
 FirebaseJson json;
 
@@ -107,7 +115,6 @@ static lv_color_t buf1[screenWidth * screenHeight / 13];
 // Timer variables (send new readings every thirty seconds)
 unsigned long sendDataPrevMillis = 0;
 unsigned long timerDelay = 30000;
-
 
 
 // Initialize WiFi
@@ -202,18 +209,27 @@ void touch_calibrate() {
   }
   for (int i = 0; i < 5; i++) {
     Serial.println(calData[i]);
-}
+  }
   Serial.println("Calibration complete!");
 }
 
 
+void relais_once() {
+  state_led = !state_led;
+  digitalWrite(relais_PIN, state_led);
+}
 
 void setLedBrightness(int r, int v, int b) {
   neopixelWrite(RGB_BUILTIN, r, v, b);
 }
 void get_Value() {
-  int local_tab[3] = { lumiere, pression, temperature };
-  for (int i = 0; i < 3; i++) {
+  int local_tab[4] = {
+    lumiere,
+    pression,
+    temperature,
+    LPG_PPM
+  };
+  for (int i = 0; i < 4; i++) {
     tab_sensor[i] = local_tab[i];
   }
 }
@@ -235,9 +251,7 @@ String dump_byte_array_to_string(byte *buffer, byte bufferSize) {
 void readCard() {
   bNewInt = true;
 }
-void touchTft(){
-  lv_timer_handler();
-}
+
 /*
  * The function sending to the MFRC522 the needed commands to activate the reception
  */
@@ -254,20 +268,28 @@ void clearInt(MFRC522 mfrc522) {
   mfrc522.PCD_WriteRegister(mfrc522.ComIrqReg, 0x7F);
 }
 
+float calculatePPM(float Rs_Ro, float m, float b) {
+  float logPPM = m * log10(Rs_Ro) + b;
+  return pow(10, logPPM);
+}
+
 
 void setup() {
-  pinMode(1,OUTPUT);
-  digitalWrite(10,HIGH);
-  digitalWrite(4,HIGH);
-  digitalWrite(1,HIGH);
+  pinMode(relais_PIN, OUTPUT);
+  pinMode(MQ_PIN, INPUT);
+  pinMode(1, OUTPUT);
+  pinMode(4, OUTPUT);
+  pinMode(10, OUTPUT);
+  digitalWrite(10, HIGH);
+  digitalWrite(4, HIGH);
+  digitalWrite(1, HIGH);
   Serial.begin(115200);
   SPI.begin(7, 0, 6, 1);
-  Wire.begin(3, 2);  //Join I2C bus
+  Wire.begin(3, 15);  //Join I2C bus
   bmp280.begin();
-  initWiFi();
   mfrc522.PCD_Init();
-  
-   //interrupt
+
+  //interrupt
   pinMode(IRQ_PIN, INPUT_PULLUP);
   regVal = 0xA0;  //rx irq
   mfrc522.PCD_WriteRegister(mfrc522.ComIEnReg, regVal);
@@ -276,13 +298,13 @@ void setup() {
 
   /*Activate the interrupt*/
   attachInterrupt(digitalPinToInterrupt(IRQ_PIN), readCard, FALLING);
-   //interrupt
-  delay(20);
+  //interrupt
+  delay(1000);
   lightMeter.begin();
 
 
 
- 
+  initWiFi();
   configTime(0, 0, ntpServer);
 
   // Assign the api key (required)
@@ -324,9 +346,8 @@ void setup() {
   lcd.fillScreen(TFT_BLACK);
   if (Calldata) {
     touch_calibrate();
-  }
-  else{
-    lcd.setTouch(calData); 
+  } else {
+    lcd.setTouch(calData);
   }
   //lvgl init
   lv_init();
@@ -353,16 +374,15 @@ void setup() {
   lcd.fillScreen(TFT_BLACK);
 
   ui_init();
-
   Serial.println("Setup done");
 }
 
 
 
 void loop() {
-  
+
   if (bNewInt) {
-    digitalWrite(1,HIGH);
+    digitalWrite(1, HIGH);
     mfrc522.PICC_ReadCardSerial();
     String name = dump_byte_array_to_string(mfrc522.uid.uidByte, mfrc522.uid.size);
     if (Firebase.ready()) {
@@ -376,33 +396,37 @@ void loop() {
     }
     clearInt(mfrc522);
     mfrc522.PICC_HaltA();
-    strncpy(rfid, name.c_str(), sizeof(rfid) - 1);
+    //strncpy(rfid, name.c_str(), sizeof(rfid) - 1);
+    name = "";
     bNewInt = false;
   }
   activateRec(mfrc522);
-  lumiere = lightMeter.readLightLevel();
-  pression = bmp280.getPressure();
-  temperature = bmp280.getTemperature();
+
   if (Firebase.ready() && (millis() - sendDataPrevMillis > timerDelay || sendDataPrevMillis == 0)) {
+    lumiere = lightMeter.readLightLevel();
+    pression = bmp280.getPressure();
+    temperature = bmp280.getTemperature();
+    int gazSensorValue = analogRead(MQ_PIN);
+    float Vout = (gazSensorValue / 1023.0) * Vc;
+    float Rs = ((5.0 - Vout) / Vout) * RL;
+    Rs_Ro_ratio = Rs / Ro;
+    LPG_PPM = calculatePPM(Rs_Ro_ratio, -0.45, 2.3);
+
+
     sendDataPrevMillis = millis();
     //Get current timestamp
-    timestamp = getTime();
     //Serial.print ("time: ");
     //Serial.println (timestamp);
-   
+
     parentPath = databasePath + "/" + String(timestamp);
 
     json.set(tempPath.c_str(), String(temperature));
     json.set(rfidPath.c_str(), "");
     json.set(lumPath.c_str(), String(lumiere));
     json.set(presPath.c_str(), String(pression));
-    json.set(gazPath.c_str(),"100");
+    json.set(gazPath.c_str(), String(LPG_PPM));
     json.set(timePath, String(timestamp));
     Serial.printf("Set json... %s\n", Firebase.RTDB.setJSON(&fbdo, parentPath.c_str(), &json) ? "ok" : fbdo.errorReason().c_str());
   }
   lv_timer_handler();
 }
-
-
-
-

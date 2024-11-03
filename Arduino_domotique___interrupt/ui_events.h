@@ -6,6 +6,8 @@
 #ifndef _UI_EVENTS_H
 #define _UI_EVENTS_H
 
+extern int relais_Speed;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -14,6 +16,9 @@ void Lumiere_rouge(lv_event_t * e);
 void Lumiere_vert(lv_event_t * e);
 void Lumiere_bleu(lv_event_t * e);
 void update_value(lv_event_t * e);
+void Speed_relais(lv_event_t * e);
+void Activate_relais_once(lv_event_t * e);
+void Activate_relais_loop(lv_event_t * e);
 
 #ifdef __cplusplus
 } /*extern "C"*/
