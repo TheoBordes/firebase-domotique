@@ -96,10 +96,12 @@ const setupUI = (user) => {
       chartT.destroy();
       chartH.destroy();
       chartP.destroy();
+      chartG.destroy();
       // Render new charts to display new range of data
       chartT = createTemperatureChart();
       chartH = createLuminosityChart();
       chartP = createPressureChart();
+      chartG = createGazChart();
       // Update the charts with the new range
       // Get the latest readings and plot them on charts (the number of plotted readings corresponds to the chartRange value)
       console.log("Valeur de chartRange :", chartRange);
@@ -111,27 +113,34 @@ const setupUI = (user) => {
         var pressure = jsonData.pressure;
         var timestamp = jsonData.timestamp;
         var rfid = jsonData.rfid;
-        if (rfid !=""){
-          rfidElement.innerHTML = rfid; 
-        if (rfid.trim() == "53 7C C8 A9") { 
-          led.className = 'led green';
-        rfid=""; }
-        else {
-          led.className = 'led'; 
-          rfid ="";
-        }
-        clearTimeout(ledTimeout);  
-        ledTimeout = setTimeout(() => {
+        var gaz = jsonData.gaz;
+        if (rfid != "") {
+          rfidElement.innerHTML = rfid;
+          if (rfid.trim() == "53 7C C8 A9") {
+            led.className = 'led green';
+            rfid = "";
+          }
+          else {
             led.className = 'led';
-            rfid ="";
-            rfidElement.innerHTML = ""; 
-        }, 10000);}
-        
-         
+            rfid = "";
+          }
+          clearTimeout(ledTimeout);
+          ledTimeout = setTimeout(() => {
+            led.className = 'led';
+            rfid = "";
+            rfidElement.innerHTML = "";
+          }, 10000);
+        }
+        else {
+            led.className = 'led';
+            rfid = "";
+            rfidElement.innerHTML = "";
+        }
         // Plot the values on the charts
         plotValues(chartT, timestamp, temperature);
         plotValues(chartH, timestamp, luminosity);
         plotValues(chartP, timestamp, pressure);
+        plotValues(chartG, timestamp, gaz);
       });
     });
 
@@ -176,13 +185,14 @@ const setupUI = (user) => {
       var temperature = jsonData.temperature;
       var luminosity = jsonData.luminosity;
       var pressure = jsonData.pressure;
+      var gaz = jsonData.gaz;
       var timestamp = jsonData.timestamp;
-      var rfid = jsonData.rfid;
       // Update DOM elements
+      gazElement.innerHTML = gaz;
       tempElement.innerHTML = temperature;
       lumElement.innerHTML = luminosity;
       presElement.innerHTML = pressure;
-     
+
       //gazElement.innerHTML = gaz;
       updateElement.innerHTML = epochToDateTime(timestamp);
     });
@@ -193,9 +203,7 @@ const setupUI = (user) => {
       var jsonData = snapshot.toJSON(); // example: {temperature: 25.02, luminosity: 50.20, pressure: 1008.48, timestamp:1641317355}
       var temperature = jsonData.temperature;
       var luminosity = jsonData.luminosity;
-      var rfid = jsonData.rfid;
-      var pressure = jsonData.pressure;
-      if (rfid !="" ){
+      if (rfid != "") {
         return;
       }
       var timestamp = jsonData.timestamp;
@@ -229,7 +237,7 @@ const setupUI = (user) => {
     // Function that creates the table with the first 100 readings
     function createTable() {
       // append all data to the table
-              
+
       var firstRun = true;
       dbRef.orderByKey().limitToLast(100).on('child_added', function (snapshot) {
         if (snapshot.exists()) {
@@ -239,7 +247,8 @@ const setupUI = (user) => {
           var luminosity = jsonData.luminosity;
           var pressure = jsonData.pressure;
           var rfid = jsonData.rfid;
-          if (rfid !=""){
+          if (rfid != "" ) {
+
             return;
           }
           var gaz = jsonData.gaz;
@@ -252,7 +261,6 @@ const setupUI = (user) => {
           content += '<td>' + luminosity + '</td>';
           content += '<td>' + pressure + '</td>';
           content += '<td>' + gaz + '</td>';
-         // content += '<td>' + rfid + '</td>';
           content += '</tr>';
           $('#tbody').prepend(content);
           // Save lastReadingTimestamp --> corresponds to the first timestamp on the returned snapshot data
@@ -266,7 +274,7 @@ const setupUI = (user) => {
     };
     // append readings to table (after pressing More results... button)
     function appendToTable() {
-      
+
       var dataList = []; // saves list of readings returned by the snapshot (oldest-->newest)
       var reversedList = []; // the same as previous, but reversed (newest--> oldest)
       console.log("APEND");
@@ -291,7 +299,7 @@ const setupUI = (user) => {
               var luminosity = element.luminosity;
               var pressure = element.pressure;
               var gaz = element.gaz;
-              
+
               var timestamp = element.timestamp;
               var content = '';
               content += '<tr>';
@@ -300,7 +308,6 @@ const setupUI = (user) => {
               content += '<td>' + luminosity + '</td>';
               content += '<td>' + pressure + '</td>';
               content += '<td>' + gaz + '</td>';
-              //content += '<td>' + rfid + '</td>';
               content += '</tr>';
               $('#tbody').append(content);
             }
@@ -338,9 +345,4 @@ const setupUI = (user) => {
   }
 }
 
-/*
-setInterval(() => {
-        led.className = 'led';
-        rfidElement.innerHTML = "";
-}, 10000);
-*/
+

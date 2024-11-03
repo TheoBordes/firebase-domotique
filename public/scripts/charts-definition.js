@@ -5,6 +5,7 @@ function onload(event){
   chartT = createTemperatureChart();
   chartH = createLuminosityChart();
   chartP = createPressureChart();
+  chartG = createGazChart();
 }
 
 // Create Temperature Chart
@@ -126,3 +127,42 @@ function createPressureChart() {
   return chart;
 }
 
+// Create Gaz Chart
+function createGazChart() {
+  var chart = new Highcharts.Chart({
+    chart:{ 
+      renderTo:'chart-gaz',
+      type: 'spline'  
+    },
+    series: [{
+      name: 'MH sensor'
+    }],
+    title: { 
+      text: undefined
+    },    
+    plotOptions: {
+      line: { 
+        animation: false,
+        dataLabels: { 
+          enabled: true 
+        }
+      },
+      series: { 
+        color: '#5560c2' 
+      }
+    },
+    xAxis: {
+      type: 'datetime',
+      dateTimeLabelFormats: { second: '%H:%M:%S' }
+    },
+    yAxis: {
+      title: { 
+        text: 'Gaz ' 
+      }
+    },
+    credits: { 
+      enabled: false 
+    }
+  });
+  return chart;
+}

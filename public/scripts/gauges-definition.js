@@ -34,7 +34,7 @@ function createTemperatureGauge() {
                 "color": "rgba(200, 50, 50, .75)"
             }
         ],
-        colorPlate: "#fff",
+        colorPlate: "#292929",
         colorBarProgress: "#CC2936",
         colorBarProgressEnd: "#049faa",
         borderShadowWidth: 0,
@@ -83,7 +83,7 @@ function createLuminosityGauge(){
                 "color": "#03C0C1"
             }
         ],
-        colorPlate: "#fff",
+        colorPlate: "#292929",
         borderShadowWidth: 0,
         borders: false,
         needleType: "line",
