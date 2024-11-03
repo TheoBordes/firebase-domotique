@@ -14,16 +14,29 @@ Description	:	The code is currently available based on the course on YouTube,
 #include <FS.h>
 #include <TFT_eSPI.h>
 #include <BH1750.h>
-
-
+/**************************TFT_eSPI************************
+If you don't know how to configure TFT_eSPI library for the display and touch driver
+Please refer to the content of the fifth lesson
+**************************************************************/
 #include <Arduino.h>
 #include <SPI.h>
 
-
+/**************************LVGL and UI************************
+if you want to use the LVGL demo. you need to include <demos/lv_demos.h> and <examples/lv_examples.h>. 
+if not, please do not include it. It will waste your Flash space.
+**************************************************************/
 #include <lvgl.h>
 #include "ui.h"
+// #include <demos/lv_demos.h>
+// #include <examples/lv_examples.h>
+/**************************LVGL and UI END************************/
 
-
+/*******************************************************************************
+ * Please define the corresponding macros based on the board you have purchased.
+ * CrowPanel_24 means CrowPanel ESP32 HMI 2.4inch Board
+ * CrowPanel_28 means CrowPanel ESP32 HMI 2.8inch Board
+ * CrowPanel_35 means CrowPanel ESP32 HMI 3.5inch Board
+ ******************************************************************************/
 #define CALIBRATION_FILE "/TouchCalData1"
 #define Caldata false
 #define SS_PIN 1  
@@ -40,19 +53,37 @@ int lumiere =0;
 extern "C" void setLedBrightness(int r,int v, int b);
 extern "C" int get_Value();
 
+#define CrowPanel_24
+//#define CrowPanel_28
+//#define CrowPanel_35
+
+#if defined (CrowPanel_35)
+/*screen resolution*/
+static const uint16_t screenWidth  = 480;
+static const uint16_t screenHeight = 320;
+uint16_t calData[5] = { 353, 3568, 269, 3491, 7  };     /*touch caldata*/
+
+#elif defined (CrowPanel_24)
 static const uint16_t screenWidth  = 320;
 static const uint16_t screenHeight = 240;
 uint16_t calData[5] = { 557, 3263, 369, 3493, 3  };
 
+#elif defined (CrowPanel_28)
+static const uint16_t screenWidth  = 320;
+static const uint16_t screenHeight = 240;
+uint16_t calData[5] = { 189, 3416, 359, 3439, 1 };
+#endif
 
 BH1750 lightMeter;
 BMP280 bmp280;
-TFT_eSPI lcd = TFT_eSPI();
+TFT_eSPI lcd = TFT_eSPI(); /* TFT entity */
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 
 static lv_disp_draw_buf_t draw_buf;
 static lv_color_t buf1[ screenWidth * screenHeight / 13 ];
 
+//_______________________
+/* display flash */
 void my_disp_flush( lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p )
 {
   uint32_t w = ( area->x2 - area->x1 + 1 );
