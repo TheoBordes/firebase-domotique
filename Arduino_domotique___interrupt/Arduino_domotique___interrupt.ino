@@ -1,10 +1,3 @@
-/*
-  Rui Santos
-  Complete project details at our blog: https://RandomNerdTutorials.com/esp32-data-logging-firebase-realtime-database/
-  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files.
-  The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
 #include <Arduino.h>
 #include <WiFi.h>
 #include <Firebase_ESP_Client.h>
@@ -85,7 +78,7 @@ int tab_sensor[4];
 static const uint16_t screenWidth = 320;
 static const uint16_t screenHeight = 240;
 uint16_t calData[5] = { 264, 3403, 416, 3262, 1 };
-int currentTime = 0, previousTime = 0;
+unsigned long currentTime = 0, previousTime = 0,led_time =0;
 bool state_led = 0;
 
 FirebaseJson json;
@@ -380,7 +373,7 @@ void setup() {
 
 
 void loop() {
-
+  currentTime = millis();
   if (bNewInt) {
     digitalWrite(1, HIGH);
     mfrc522.PICC_ReadCardSerial();
@@ -397,12 +390,17 @@ void loop() {
     clearInt(mfrc522);
     mfrc522.PICC_HaltA();
     //strncpy(rfid, name.c_str(), sizeof(rfid) - 1);
+    if (name == "53 7C C8 A9" & !state_led){relais_once(); led_time = currentTime;}
     name = "";
     bNewInt = false;
+    
   }
   activateRec(mfrc522);
+ if ( state_led & (currentTime - led_time > 10000)){relais_once();}
 
-  if (Firebase.ready() && (millis() - sendDataPrevMillis > timerDelay || sendDataPrevMillis == 0)) {
+  if (Firebase.ready() && (currentTime - sendDataPrevMillis > timerDelay || sendDataPrevMillis == 0)) {
+
+    
     lumiere = lightMeter.readLightLevel();
     pression = bmp280.getPressure();
     temperature = bmp280.getTemperature();
@@ -411,12 +409,11 @@ void loop() {
     float Rs = ((5.0 - Vout) / Vout) * RL;
     Rs_Ro_ratio = Rs / Ro;
     LPG_PPM = calculatePPM(Rs_Ro_ratio, -0.45, 2.3);
+    
 
-
-    sendDataPrevMillis = millis();
-    //Get current timestamp
-    //Serial.print ("time: ");
-    //Serial.println (timestamp);
+    sendDataPrevMillis = currentTime;
+  
+    timestamp = getTime();
 
     parentPath = databasePath + "/" + String(timestamp);
 
