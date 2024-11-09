@@ -1,221 +1,341 @@
 <!DOCTYPE html>
-<html>
+<script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-app.js"></script>
+
+<!-- include only the Firebase features as you need -->
+<script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-database.js"></script>
+
+
+<script>
+  // Replace with your app config object
+  const firebaseConfig = {
+    apiKey: "AIzaSyALggtPTOCEyw0RQW2k3icytNeCiU2NzK8",
+    authDomain: "domotique-426ee.firebaseapp.com",
+    databaseURL: "https://domotique-426ee-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "domotique-426ee",
+    storageBucket: "domotique-426ee.appspot.com",
+    messagingSenderId: "299754850886",
+    appId: "1:299754850886:web:e38ef0bcad0bbb3d181847",
+    measurementId: "G-MG55Q36FD0"
+  };
+
+  // Initialize firebase
+  firebase.initializeApp(firebaseConfig);
+
+  // Make auth and database references
+  const auth = firebase.auth();
+  const db = firebase.database();
+
+</script>
+<!-- include highchartsjs to build the charts-->
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<!-- include to use jquery-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<!--include icons from fontawesome-->
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
+  integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<!-- include Gauges Javascript library-->
+<script src="https://cdn.rawgit.com/Mikhus/canvas-gauges/gh-pages/download/2.1.7/all/gauge.min.js"></script>
+<script type="x-shader/x-fragment" id="vertShader">
+  precision mediump float;
+
+  varying vec2 vUv;
+  attribute vec2 a_position;
+
+  void main() {
+      vUv = .5 * (a_position + 1.);
+      gl_Position = vec4(a_position, 0.0, 1.0);
+  }
+</script>
+
+<script type="x-shader/x-fragment" id="fragShader">
+  precision mediump float;
+
+  varying vec2 vUv;
+  uniform float u_time;
+  uniform float u_ratio;
+  uniform vec2 u_pointer_position;
+  uniform float u_scroll_progress;
+
+  vec2 rotate(vec2 uv, float th) {
+      return mat2(cos(th), sin(th), -sin(th), cos(th)) * uv;
+  }
+
+  float neuro_shape(vec2 uv, float t, float p) {
+      vec2 sine_acc = vec2(0.);
+      vec2 res = vec2(0.);
+      float scale = 8.;
+
+      for (int j = 0; j < 15; j++) {
+          uv = rotate(uv, 1.);
+          sine_acc = rotate(sine_acc, 1.);
+          vec2 layer = uv * scale + float(j) + sine_acc - t;
+          sine_acc += sin(layer);
+          res += (.5 + .5 * cos(layer)) / scale;
+          scale *= (1.2 - .07 * p);
+      }
+      return res.x + res.y;
+  }
+
+  void main() {
+      vec2 uv = .5 * vUv;
+      uv.x *= u_ratio;
+
+      vec2 pointer = vUv - u_pointer_position;
+      pointer.x *= u_ratio;
+      float p = clamp(length(pointer), 0., 1.);
+      p = .5 * pow(1. - p, 2.);
+
+      float t = .001 * u_time;
+      vec3 color = vec3(0.);
+
+      float noise = neuro_shape(uv, t, p);
+
+      noise = 1.2 * pow(noise, 3.);
+      noise += pow(noise, 10.);
+      noise = max(.0, noise - .5);
+      noise *= (1. - length(vUv - .5));
+
+      color = normalize(vec3(.2, .5 + .4 * cos(3. * u_scroll_progress), .5 + .5 * sin(3. * u_scroll_progress)));
+
+      color = color * noise;  
+
+      gl_FragColor = vec4(color, noise);
+  }
+</script>
+<link rel="icon" type="image/png" href="favicon.png">
+<html lang="fr">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Domotique by Theo</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-  <!-- include Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-app.js"></script>
-
-  <!-- include only the Firebase features as you need -->
-  <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-database.js"></script>
-
-  <script>
-    // Replace with your app config object
-    const firebaseConfig = {
-      apiKey: "AIzaSyALggtPTOCEyw0RQW2k3icytNeCiU2NzK8",
-      authDomain: "domotique-426ee.firebaseapp.com",
-      databaseURL: "https://domotique-426ee-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "domotique-426ee",
-      storageBucket: "domotique-426ee.appspot.com",
-      messagingSenderId: "299754850886",
-      appId: "1:299754850886:web:e38ef0bcad0bbb3d181847",
-      measurementId: "G-MG55Q36FD0"
-    };
-
-    // Initialize firebase
-    firebase.initializeApp(firebaseConfig);
-
-    // Make auth and database references
-    const auth = firebase.auth();
-    const db = firebase.database();
-
-  </script>
-
-  <!-- include highchartsjs to build the charts-->
-  <script src="https://code.highcharts.com/highcharts.js"></script>
-  <!-- include to use jquery-->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <!--include icons from fontawesome-->
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
-    integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-  <!-- include Gauges Javascript library-->
-  <script src="https://cdn.rawgit.com/Mikhus/canvas-gauges/gh-pages/download/2.1.7/all/gauge.min.js"></script>
-  <!--reference for favicon-->
-  <link rel="icon" type="image/png" href="favicon.png">
-  <!--reference a stylesheet-->
-  <link rel="stylesheet" type="text/css" href="style.css">
+  <title>Brainwave</title>
+  <link rel="stylesheet" href="./style.css">
 
 </head>
 
 <body>
-  <!--AUTHENTICATION BAR (USER DETAILS/LOGOUT BUTTON)-->
-  <div id="authentication-bar">
-    <p><span id="authentication-status">User logged in</span>
-      <span id="user-details">USEREMAIL</span>
-      <a href="/" id="logout-link">(logout)</a>
-    </p>
-  </div>
 
   <!--LOGIN FORM-->
-  <form id="login-form" style="display: none;">
+  <form id="login-form">
     <div class="form-elements-container">
-      <label for="input-email"><b>Email</b></label>
-      <input type="text" placeholder="Enter Username" id="input-email" required>
+      <!-- Nom -->
+      <div class="group">
+        <input type="text" class="input" id="input-email" required>
+        <span class="highlight"></span>
+        <span class="bar"></span>
+      </div>
+  
+      <!-- Mot de passe -->
+      <div class="group">
+    
+        <input type="password" class="input" id="input-password" required>
+        <span class="highlight"></span>
+        <span class="bar"></span>
+      </div>
 
-      <label for="input-password"><b>Password</b></label>
-      <input type="password" placeholder="Enter Password" id="input-password" required>
+      <!-- Message d'erreur -->
 
-      <button type="submit" id="login-button">Login</button>
-      <p id="error-message" style="color:red;"></p>
       
+      <p id="error-message" style="color: red;"></p>
+  
+      <!-- Bouton de connexion -->
+      <button type="submit" class="boton-elegante">Login</button>
     </div>
   </form>
+  
 
-  <!--CONTENT (SENSOR READINGS)-->
-  <div class="content-sign-in" id="content-sign-in" style="display: none;">
+  <canvas id="neuro"></canvas>
 
-    <!--LAST UPDATE-->
+  <div style="display:  none;" id="last_update">
     <p><span class="date-time">Last update: <span id="lastUpdate"></span></span></p>
-    <p>
-      Cards: <input type="checkbox" id="cards-checkbox" name="cards-checkbox" checked>
-      Gauges: <input type="checkbox" id="gauges-checkbox" name="gauges-checkbox" checked>
-      Charts: <input type="checkbox" id="charts-checkbox" name="charts-checkbox" unchecked>
-    </p>
-    <div class="cards">
-    <div id="cards-div">
-      <div class="cards">
-        <!--TEMPERATURE-->
-        <div class="card">
-          <p><i class="fas fa-thermometer-half" style="color:#059e8a;"></i> TEMPERATURE</p>
-          <p><span class="reading"><span id="temp"></span> &deg;C</span></p>
-        </div>
-        <!--luminosity-->
-        <div class="card">
-          <p><i class="fas fa-lightbulb" style="color:#00add6;"></i> LUMINOSITY</p>
-          <p><span class="reading"><span id="lum"></span> lx</span></p>
-        </div>
-        <!--PRESSURE-->
-        <div class="card">
-          <p><i class="fas fa-angle-double-down" style="color:#e1e437;"></i> PRESSURE</p>
-          <p><span class="reading"><span id="pres"></span> hPa</span></p>
-        </div>
-        <!--RFID-->
-        <div class="card">
-          <p><i class="fas fa-address-card " style="color:#000000;"></i> RFID </p>
-          <p></span> NOM : </span><span class="reading"><span id="rfid"></p>
-        </div>
-        <div class="card">
-          <p><i class="fas fa-gas-pump " style="color:#aa08a2;"></i> GAZ </p>
-          <p><span class="reading"><span id="gaz"></span> ppm</span></p>
-        </div>
-        <!--led-->
-          <div id="led" class="led"></div>
-      </div>
-    </div>
-
-    <!--GAUGES-->
-    <div id="gauges-div">
-      <div class="cards">
-        <!--TEMPERATURE-->
-        <div class="card">
-          <canvas id="gauge-temperature"></canvas>
-        </div>
-        <!--LUMINOSITY -->
-        <div class="card">
-          <canvas id="gauge-luminosity"></canvas>
-        </div>
-      </div>
-    </div>
   </div>
-    <!--CHARTS-->
-    <div id="charts-div">
-      <!--SET NUMBER OF READINGS INPUT FIELD-->
-      <div>
-        <p> Number of readings: <input type="number" id="charts-range"></p>
+  <div class="app" id="app">
+
+    <div class="sidebar">
+      <div class="user">
+        <div class="user-name">Théo</div>
+        <p>
+          <span id="user-details">USEREMAIL</span>
+          <a href="/" id="logout-link">(logout)</a>
+        </p>
+
+
       </div>
-      <!--TEMPERATURE-CHART-->
-      <div class="cards">
-        <div class="card">
-          <p><i class="fas fa-thermometer-half" style="color:#059e8a;"></i> TEMPERATURE CHART</p>
-          <div id="chart-temperature" class="chart-container"></div>
+      <div class="sidebar-menu">
+        <a href="#" class="sidebar-menu__link active">DashBoard</a>
+        <a href="#" class="sidebar-menu__link">Information</a>
+        <a href="#" class="sidebar-menu__link">Productivity</a>
+        <div class="sidebar-menu__link">
+          </span> NOM : </span><span class="reading"><span id="rfid">
+        </div>
+        <div class="sidebar-menu">
+          <div id="led" class="led"></div>
         </div>
       </div>
-      <!--LUMINOSITY-CHART-->
-      <div class="cards">
-        <div class="card">
-          <p><i class="fas fa-lightbulb" style="color:#00add6;"></i> LUMINOSITY CHART</p>
-          <div id="chart-luminosity" class="chart-container"></div>
-        </div>
-      </div>
-      <!--PRESSURE-CHART-->
-      <div class="cards">
-        <div class="card">
-          <p><i class="fas fa-angle-double-down" style="color:#e1e437;"></i> PRESSURE CHART</p>
-          <div id="chart-pressure" class="chart-container"></div>
-        </div>
-      </div>
-      <div class="cards">
-        <div class="card">
-          <p><i class="fas fa-gas-pump " style="color:#aa08a2;"></i> GAZ CHART</p>
-          <div id="chart-gaz" class="chart-container"></div>
-        </div>
-      </div>
+
     </div>
-    <!--BUTTONS TO HANDLE DATA-->
-    <p>
-      <!--View data button-->
-      <button id="view-data-button">View all data</button>
-      <!--Hide data button-->
-      <button id="hide-data-button" style="display:none;">Hide data</button>
-      <!--Delete data button-->
-      <button id="delete-button" class="deletebtn">Delete data</button>
-    </p>
-    <!--Modal to delete data-->
-    <div id="delete-modal" class="modal" sytle="display:none">
-      <span onclick="document.getElementById('delete-modal').style.display='none'" class="close"
-        title="Close Modal">×</span>
-      <form id="delete-data-form" class="modal-content" action="/">
-        <div class="container">
-          <h1>Delete Data</h1>
-          <p>Are you sure you want to delete all data from database?</p>
-          <div class="clearfix">
-            <button type="button" onclick="document.getElementById('delete-modal').style.display='none'"
-              class="cancelbtn">Cancel</button>
-            <button type="submit" onclick="document.getElementById('delete-modal').style.display='none'"
-              class="deletebtn">Delete</button>
+    <div class="main">
+      <div class="main-header">
+        <div class="main-header__title">Brainwave</div>
+        <button class="main-header__add">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="main-header-nav">
+        <a href="#" class="nav-item active"> Mesures Ambiantes</a>
+        <a href="#" class="nav-item">Graph</a>
+        <a href="#" class="nav-item">Data</a>
+        <a href="#" class="nav-item">Musique</a>
+
+      </div>
+
+
+      <div class="content-side-item" id="information-side-content">
+        <span> 2</span>
+      </div>
+      <div class="content-side-item" id="productivity-side-content">
+        <span> 3</span>
+      </div>
+      <div class="content-side-item" id="dashboard-side-content" s">
+        <div class="content">
+
+          <div class="content-item" id="mesures ambiantes-content">
+            <div class="scrollable-div">
+              <cards>
+                <div class="card_value">
+                  <p><i class="fas fa-thermometer-half" style="color:#059e8a;"></i> TEMPERATURE</p>
+                  <p><span class="reading"><span id="temp"></span> &deg;C</span></p>
+                </div>
+                <!--luminosity-->
+                <div class="card_value">
+                  <p><i class="fas fa-lightbulb" style="color:#00add6;"></i> LUMINOSITY</p>
+                  <p><span class="reading"><span id="lum"></span> lx</span></p>
+                </div>
+                <!--PRESSURE-->
+                <div class="card_value">
+                  <p><i class="fas fa-angle-double-down" style="color:#e1e437;"></i> PRESSURE</p>
+                  <p><span class="reading"><span id="pres"></span> hPa</span></p>
+                </div>
+                <!--RFID-->
+                <div class="card_value">
+                  <p><i class="fas fa-gas-pump " style="color:#aa08a2;"></i> GAZ </p>
+                  <p><span class="reading"><span id="gaz"></span> ppm</span></p>
+                </div>
+              </cards>
+            </div>
+          </div>
+          <div class="content-item" id="musique-content">
+            <iframe style="border-radius:12px"
+              src="https://open.spotify.com/embed/track/4PTG3Z6ehGkBFwjybzWkR8?utm_source=generator" width="100%"
+              height="352" frameBorder="0" allowfullscreen=""
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"></iframe>
+          </div>
+          <div class="content-item" id="graph-content">
+
+            <div class="scrollable-div">
+              <div id="charts-div">
+                <!--SET NUMBER OF READINGS INPUT FIELD-->
+                <div>
+                  <p> Number of readings: <input type="number" id="charts-range"></p>
+                </div>
+                <!--TEMPERATURE-CHART-->
+                <div class="cards">
+                  <div class="card_chart">
+                    <p><i class="fas fa-thermometer-half" style="color:#059e8a;"></i> TEMPERATURE CHART</p>
+                    <div id="chart-temperature" class="chart-container"></div>
+                  </div>
+                </div>
+                <!--LUMINOSITY-CHART-->
+                <div class="cards">
+                  <div class="card_chart">
+                    <p><i class="fas fa-lightbulb" style="color:#00add6;"></i> LUMINOSITY CHART</p>
+                    <div id="chart-luminosity" class="chart-container"></div>
+                  </div>
+                </div>
+                <!--PRESSURE-CHART-->
+                <div class="cards">
+                  <div class="card_chart">
+                    <p><i class="fas fa-angle-double-down" style="color:#e1e437;"></i> PRESSURE CHART</p>
+                    <div id="chart-pressure" class="chart-container"></div>
+                  </div>
+                </div>
+                <div class="cards">
+                  <div class="card_chart">
+                    <p><i class="fas fa-gas-pump " style="color:#aa08a2;"></i> GAZ CHART</p>
+                    <div id="chart-gaz" class="chart-container"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class=" content-item" id="data-content">
+
+          <!--View data button-->
+          <button id="view-data-button" class="button">View all data</button>
+          <!--Hide data button-->
+          <button id="hide-data-button" class=" button">Hide data</button>
+          <!--Delete data button-->
+          <button id="delete-button" class="button">Delete data</button>
+
+          <!--Modal to delete data-->
+          <div id="delete-modal" class="modal" sytle="display:none">
+            <span onclick="document.getElementById('delete-modal').style.display='none'" class="close"
+              title="Close Modal">×</span>
+            <form id="delete-data-form" class="modal-content" action="/">
+              <div class="container">
+                <h1>Delete Data</h1>
+                <p>Are you sure you want to delete all data from database ?</p>
+                <div class="clearfix">
+                  <button type="button" class="button"
+                    onclick="document.getElementById('delete-modal').style.display='none'">Cancel</button>
+                  <button type="submit" class="button"
+                    onclick="document.getElementById('delete-modal').style.display='none'">Delete</button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+
+          <div class="scrollable-div">
+            <div class="card_value" id="table-container" style="display:none;">
+              <table id="readings-table">
+                <tr id="theader">
+                  <th>Timestamp</th>
+                  <th>Temp (ºC)</th>
+                  <th>Lum (%)</th>
+                  <th>Pres (hPa)</th>
+                  <th>Gaz</th>
+                </tr>
+                <tbody id="tbody">
+                </tbody>
+              </table>
+              <p><button id="load-data" class=" button">More results...</button></p>
+            </div>
           </div>
         </div>
-      </form>
-    </div>
-
-    <!--TABLE WITH ALL DATA-->
-    <div class="cards">
-      <div class="card" id="table-container" style="display:none;">
-        <table id="readings-table">
-          <tr id="theader">
-            <th>Timestamp</th>
-            <th>Temp (ºC)</th>
-            <th>Lum (%)</th>
-            <th>Pres (hPa)</th>
-            <th>Gaz</th>
-          </tr>
-          <tbody id="tbody">
-          </tbody>
-        </table>
-        <p><button id="load-data" style="display:none;">More results...</button></p>
       </div>
     </div>
+
   </div>
 
-  <!--INCLUDE JS FILES-->
+
+  <!-- partial:index.partial.html -->
+  <script src="scripts/index.js"></script>
   <script src="scripts/auth.js"></script>
   <script src="scripts/charts-definition.js"></script>
   <script src="scripts/gauges-definition.js"></script>
-  <script src="scripts/index.js"></script>
+  <script src="./script.js"></script>
+
+  <!-- partial -->
+
 
 </body>
 

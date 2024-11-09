@@ -32,9 +32,10 @@ function plotValues(chart, timestamp, value) {
 
 // DOM elements
 const loginElement = document.querySelector('#login-form');
-const contentElement = document.querySelector("#content-sign-in");
+const neuroElement = document.querySelector("#neuro");
+const appElement = document.querySelector("#app");
+const last_updateElement = document.querySelector("#last_update");
 const userDetailsElement = document.querySelector('#user-details');
-const authBarElement = document.querySelector('#authentication-bar');
 const deleteButtonElement = document.getElementById('delete-button');
 const deleteModalElement = document.getElementById('delete-modal');
 const deleteDataFormElement = document.querySelector('#delete-data-form');
@@ -67,12 +68,13 @@ const updateElement = document.getElementById("lastUpdate")
 const setupUI = (user) => {
   if (user) {
     //toggle UI elements
+    last_updateElement.style.display = 'block';
     loginElement.style.display = 'none';
-    contentElement.style.display = 'block';
-    authBarElement.style.display = 'block';
+    appElement.className =  'app-affiche';
+    neuroElement.style.display = 'block';
     userDetailsElement.style.display = 'block';
     userDetailsElement.innerHTML = user.email;
-
+    
     // get user UID to get data from database
     var uid = user.uid;
     console.log(uid);
@@ -87,7 +89,7 @@ const setupUI = (user) => {
 
     // CHARTS
     // Number of readings to plot on charts
-    var chartRange = 1;
+    var chartRange = 10;
     // Get number of readings to plot saved on database (runs when the page first loads and whenever there's a change in the database)
     chartRef.on('value', snapshot => {
       chartRange = Number(snapshot.val());
@@ -102,6 +104,9 @@ const setupUI = (user) => {
       chartH = createLuminosityChart();
       chartP = createPressureChart();
       chartG = createGazChart();
+      if ( chartRange >21){
+        chartRange = 20;
+      }
       // Update the charts with the new range
       // Get the latest readings and plot them on charts (the number of plotted readings corresponds to the chartRange value)
       console.log("Valeur de chartRange :", chartRange);
@@ -113,6 +118,7 @@ const setupUI = (user) => {
         var pressure = jsonData.pressure;
         var timestamp = jsonData.timestamp;
         var rfid = jsonData.rfid;
+      
         var gaz = jsonData.gaz;
         if (rfid != "") {
           rfidElement.innerHTML = rfid;
@@ -146,21 +152,27 @@ const setupUI = (user) => {
 
     // Update database with new range (input field)
     chartsRangeInputElement.onchange = () => {
-      chartRef.set(chartsRangeInputElement.value);
+      console.log(chartsRangeInputElement.value);
+      if ( chartsRangeInputElement.value < 20){
+        console.log("salut");
+        chartRef.set(chartsRangeInputElement.value);
+      }
     };
 
     //CHECKBOXES
     // Checbox (cards for sensor readings)
-    cardsCheckboxElement.addEventListener('change', (e) => {
+    /* cardsCheckboxElement.addEventListener('change', (e) => {
       if (cardsCheckboxElement.checked) {
         cardsReadingsElement.style.display = 'block';
       }
       else {
         cardsReadingsElement.style.display = 'none';
       }
-    });
+
+
+    }); */
     // Checbox (gauges for sensor readings)
-    gaugesCheckboxElement.addEventListener('change', (e) => {
+    /* gaugesCheckboxElement.addEventListener('change', (e) => {
       if (gaugesCheckboxElement.checked) {
         gaugesReadingsElement.style.display = 'block';
       }
@@ -176,12 +188,13 @@ const setupUI = (user) => {
       else {
         chartsDivElement.style.display = 'none';
       }
-    });
+    }); */
 
     // CARDS
     // Get the latest readings and display on cards
     dbRef.orderByKey().limitToLast(1).on('child_added', snapshot => {
       var jsonData = snapshot.toJSON(); // example: {temperature: 25.02, luminosity: 50.20, pressure: 1008.48, timestamp:1641317355}
+      console.log("Dernier message :", jsonData);
       var temperature = jsonData.temperature;
       var luminosity = jsonData.luminosity;
       var pressure = jsonData.pressure;
@@ -192,6 +205,7 @@ const setupUI = (user) => {
       tempElement.innerHTML = temperature;
       lumElement.innerHTML = luminosity;
       presElement.innerHTML = pressure;
+      rfidElement.innerHTML = rfid;
 
       //gazElement.innerHTML = gaz;
       updateElement.innerHTML = epochToDateTime(timestamp);
@@ -339,9 +353,10 @@ const setupUI = (user) => {
   } else {
     // toggle UI elements
     loginElement.style.display = 'block';
-    authBarElement.style.display = 'none';
     userDetailsElement.style.display = 'none';
-    contentElement.style.display = 'none';
+    appElement.className = 'app-cache';
+    last_updateElement.style.display = 'none';
+
   }
 }
 
