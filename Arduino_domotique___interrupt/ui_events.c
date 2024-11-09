@@ -10,10 +10,11 @@
 extern void setLedBrightness(int r,int v, int b);
 extern void get_Value();
 extern void relais_once();
+
 extern int redValue;
 extern int greenValue;
 extern int blueValue;
-int relais_Speed=0;
+int relais_Speed=100;
 extern int tab_sensor[4];
 extern char rfid[12];
 char last_rfid[12];
@@ -59,15 +60,12 @@ void update_value(lv_event_t * e)
   //     }
   //   }
 }
-
-
 void Speed_relais(lv_event_t * e)
 {
 	lv_obj_t * slider = lv_event_get_target(e);
   int slider_value = lv_slider_get_value(slider);  
   relais_Speed = 100-slider_value;
 }
-
 
 void Activate_relais_once(lv_event_t * e)
 {

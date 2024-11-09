@@ -92,8 +92,7 @@ void ui_Screen3_screen_init(void)
     lv_obj_set_x(ui_Switch1, 115);
     lv_obj_set_y(ui_Switch1, -63);
     lv_obj_set_align(ui_Switch1, LV_ALIGN_CENTER);
-
-
+  
     lv_obj_add_event_cb(ui_Button4, ui_event_Button4, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_Slider5, ui_event_Slider5, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_Button1, ui_event_Button1, LV_EVENT_ALL, NULL);

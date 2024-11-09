@@ -1,3 +1,6 @@
+
+
+
 document.addEventListener("DOMContentLoaded", function(){
     // listen for auth status changes
     auth.onAuthStateChanged(user => {
@@ -33,8 +36,7 @@ document.addEventListener("DOMContentLoaded", function(){
             console.log(errorMessage);
         });
     });
-
-    // logout
+    // logout 
     const logout = document.querySelector('#logout-link');
     logout.addEventListener('click', (e) => {
         e.preventDefault();

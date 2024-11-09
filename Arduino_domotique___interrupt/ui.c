@@ -9,6 +9,7 @@
 ///////////////////// VARIABLES ////////////////////
 lv_timer_t * timer_sensor = NULL;
 lv_timer_t * timer_relais = NULL;
+bool timer4 = 0, button1 =0;
 
 // SCREEN: ui_Screen1
 void ui_Screen1_screen_init(void);
@@ -89,6 +90,7 @@ void ui_event_Button2(lv_event_t * e)
         _ui_screen_change(&ui_Screen2, LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, &ui_Screen2_screen_init);
     }
 }
+
 void ui_event_Button8(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
@@ -99,6 +101,8 @@ void ui_event_Button8(lv_event_t * e)
   
     }
 }
+
+
 void ui_event_Slider1(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
@@ -157,20 +161,27 @@ void ui_event_Button1(lv_event_t * e)
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
         Activate_relais_once(e);
+        button1 = !button1;
     }
 }
+
+
 void ui_event_Switch1(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED & timer_relais==NULL) {
       timer_relais = lv_timer_create(Activate_relais_once, relais_Speed*10, NULL);   
+      timer4=1;
     }
     else if (event_code == LV_EVENT_CLICKED) {
       lv_timer_del(timer_relais);  
       timer_relais = NULL;
+          timer4= 0;
     }
 }
+
+
 void ui_event_Button10(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
