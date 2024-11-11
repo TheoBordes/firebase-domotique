@@ -73,6 +73,7 @@ const setupUI = (user) => {
     appElement.className =  'app-affiche';
     neuroElement.style.display = 'block';
     userDetailsElement.style.display = 'block';
+    console.log("salut");
     userDetailsElement.innerHTML = user.email;
     
     // get user UID to get data from database

@@ -1,6 +1,3 @@
-const menuItems = document.querySelectorAll(".sidebar-menu__link");
-const contentItems = document.querySelectorAll(".content-item");
-const navItems = document.querySelectorAll(".nav-item");
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -20,6 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+
+const menuItems = document.querySelectorAll(".sidebar-menu__link");
 menuItems.forEach(menuItem => {
   menuItem.addEventListener("click", e => {
     if (!e.target.classList.contains("active")) {
@@ -37,9 +36,7 @@ menuItems.forEach(menuItem => {
   });
 });
 
-
-
-
+const navItems = document.querySelectorAll(".nav-item");
 navItems.forEach(navItem => {
   navItem.addEventListener("click", e => {
     document.querySelector(".nav-item.active").classList.remove("active");
@@ -54,7 +51,7 @@ navItems.forEach(navItem => {
 });
 
 
-const cards = document.querySelectorAll(".card");
+/* const cards = document.querySelectorAll(".card");
 const mainContent = document.querySelector(".main-content");
 cards.forEach(card => {
   card.addEventListener("click", () => {
@@ -68,7 +65,7 @@ cards.forEach(card => {
       }
     });
   });
-});
+}); */
 
 const containerEl = document.querySelector(".container");
 const canvasEl = document.querySelector("canvas#neuro");

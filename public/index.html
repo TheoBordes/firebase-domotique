@@ -7,7 +7,6 @@
 
 
 <script>
-  // Replace with your app config object
   const firebaseConfig = {
     apiKey: "AIzaSyALggtPTOCEyw0RQW2k3icytNeCiU2NzK8",
     authDomain: "domotique-426ee.firebaseapp.com",
@@ -18,13 +17,25 @@
     appId: "1:299754850886:web:e38ef0bcad0bbb3d181847",
     measurementId: "G-MG55Q36FD0"
   };
-
-  // Initialize firebase
   firebase.initializeApp(firebaseConfig);
-
-  // Make auth and database references
   const auth = firebase.auth();
   const db = firebase.database();
+
+  let isOn_fond = true;
+  let isOn = false;
+
+  document.addEventListener("DOMContentLoaded", function () {
+    let isOn = false;
+  });
+
+  function toggleFirebase() {
+    isOn = !isOn;
+    const value = isOn ? 0 : 255;
+    const ref = db.ref('UsersData/DhLyftALPZeGgzlXENSU4qf2Cz03/outputs');
+    ref.set(value);
+
+    document.getElementById("toggleButton").textContent = isOn ? "ON" : "OFF";
+  }
 
 </script>
 <!-- include highchartsjs to build the charts-->
@@ -126,10 +137,10 @@
         <span class="highlight"></span>
         <span class="bar"></span>
       </div>
-  
+
       <!-- Mot de passe -->
       <div class="group">
-    
+
         <input type="password" class="input" id="input-password" required>
         <span class="highlight"></span>
         <span class="bar"></span>
@@ -137,14 +148,14 @@
 
       <!-- Message d'erreur -->
 
-      
+
       <p id="error-message" style="color: red;"></p>
-  
+
       <!-- Bouton de connexion -->
       <button type="submit" class="boton-elegante">Login</button>
     </div>
   </form>
-  
+
 
   <canvas id="neuro"></canvas>
 
@@ -165,8 +176,8 @@
       </div>
       <div class="sidebar-menu">
         <a href="#" class="sidebar-menu__link active">DashBoard</a>
-        <a href="#" class="sidebar-menu__link">Information</a>
-        <a href="#" class="sidebar-menu__link">Productivity</a>
+        <a href="#" class="sidebar-menu__link">Action</a>
+        <a href="#" class="sidebar-menu__link">Affichage</a>
         <div class="sidebar-menu__link">
           </span> NOM : </span><span class="reading"><span id="rfid">
         </div>
@@ -195,13 +206,12 @@
       </div>
 
 
-      <div class="content-side-item" id="information-side-content">
-        <span> 2</span>
+      <div class="content-side-item" id="action-side-content">
+        <button id="toggleButton" class="button-86" onclick="toggleFirebase()">OFF</button>
       </div>
-      <div class="content-side-item" id="productivity-side-content">
-        <span> 3</span>
+      <div class="content-side-item" id="affichage-side-content">
       </div>
-      <div class="content-side-item" id="dashboard-side-content" s">
+      <div class="content-side-item" id="dashboard-side-content">
         <div class="content">
 
           <div class="content-item" id="mesures ambiantes-content">

@@ -1,8 +1,0 @@
-Variable de la config du TFT : 
-#define TFT_CS     4
-#define TFT_MOSI   6
-#define TFT_MISO   0
-#define TFT_SCLK   7
-#define TFT_DC     5
-#define TFT_RST    -1  
-#define TOUCH_CS    10
